@@ -86,7 +86,6 @@ def run_wbf(
         min_i = int(min_i.split('_')[-1].split('.')[0])
         max_i = sorted(os.listdir('./data/test/'))[-1]
         max_i = int(max_i.split('_')[-1].split('.')[0])
-        # print(min_i, max_i)
         
         prediction = {
             image_id: {'labels': [], 'boxes': [], 'scores': []}
@@ -94,25 +93,17 @@ def run_wbf(
         }
 
         for annot in tqdm(json_file):
-            # print(annot['image_id'])
             img_name = f'test_{annot["image_id"]}.jpg'
-            # print(img_name)
             img_path = os.path.join(root_path, img_name)
-            # print(img_path)
             img = Image.open(img_path).convert('RGB')
             width, height = img.size
-            
-            # if img_name == 'test_200000.jpg' or img_name == 'test_200003.jpg' or img_name == 'test_200004.jpg':
-            #     print('width:', width, ', height:', height)
             
             x1, y1, w, h = annot['bbox']
             x2, y2 = x1+w, y1+h
             
             bbox = np.array([x1, y1, x2, y2], dtype=np.float32)
-            # print(bbox)
             bbox[[0,2]] = (bbox[[0,2]]/width).clip(min=0, max=1)
             bbox[[1,3]] = (bbox[[1,3]]/height).clip(min=0, max=1)
-            # print('after:', bbox)
 
             prediction[annot['image_id']]['labels'].append(annot['category_id']) 
             prediction[annot['image_id']]['boxes'].append(bbox.tolist()) 
@@ -123,52 +114,27 @@ def run_wbf(
     wbf_predictions = []
     for image_id in tqdm(prediction.keys()):
         img_name = f'test_{image_id}.jpg'
-        # print(img_name)
         img_path = os.path.join(root_path, img_name)
-        # print(img_path)
         img = Image.open(img_path).convert('RGB')
         width, height = img.size
 
         boxes = [prediction[image_id]['boxes'] for prediction in predictions]
-        # print(boxes)
         labels = [prediction[image_id]['labels'] for prediction in predictions]
         scores = [prediction[image_id]['scores'] for prediction in predictions]
-        
-        # if image_id == 200003 or image_id == 200004:
-        #     print('boxes:', boxes)
-        #     print('labels:', labels)
-        #     print('scores:', scores)
             
         boxes, scores, labels = weighted_boxes_fusion(
             boxes, scores, labels, weights=weights,
             iou_thr=iou_thr, skip_box_thr=skip_box_thr)
-        
-        # if image_id == 200003 or image_id == 200004:
-        #     print('after boxes:', boxes)
-        #     print('after labels:', labels)
-        #     print('after scores:', scores)
-        
-        # print('boxes:', boxes)
+
         boxes[:, [0,2]] = (boxes[:, [0,2]]*width).clip(min=0, max=width-1)
         boxes[:, [1,3]] = (boxes[:, [1,3]]*height).clip(min=0, max=height-1)
 
-        # if image_id == 200003 or image_id == 200004:
-        #     print('after scaling boxes:', boxes)
-        
         widths = boxes[:, 2] - boxes[:, 0]
         heights = boxes[:, 3] - boxes[:, 1]
         boxes[:, 2] = widths
         boxes[:, 3] = heights
 
-        # if image_id == 200003 or image_id == 200004:
-        #     print('after scaling coco boxes:', boxes)
-        
-        for i, (bbox, score, label) in enumerate(zip(boxes, scores, labels)):
-            # if i == 4 or image_id == 5:
-            #     print('final bbox:', bbox)
-            #     print('final label:', label)
-            #     print('final score:', score)
-            
+        for i, (bbox, score, label) in enumerate(zip(boxes, scores, labels)):      
             wbf_predictions.append({
                 'image_id': int(image_id),
                 'category_id': int(label),

@@ -50,7 +50,6 @@ class EfficientDetDataset(Dataset):
 
         boxes = []
         labels = []
-        # areas = []
         for annot in self.annotations[index]:
             x1, y1, w, h = annot['bbox']
             x2, y2 = x1 + w, y1 + h
@@ -62,11 +61,9 @@ class EfficientDetDataset(Dataset):
             
             boxes.append([x1, y1, x2, y2])
             labels.append(annot['category_id'])
-            # areas.append(annot['area'])
 
         boxes = np.asarray(boxes)
         labels = np.asarray(labels)
-        # areas = np.asarray(areas)
 
         target = {
             'image': np.asarray(image, dtype=np.uint8),
@@ -78,7 +75,6 @@ class EfficientDetDataset(Dataset):
             target = self.transforms(**target)
 
         image = target['image']
-        # _, new_h, new_w = image.shape
         del target['image']
    
         target['bboxes'] = np.asarray(target['bboxes'])
@@ -90,8 +86,6 @@ class EfficientDetDataset(Dataset):
             'img_size': (width, height)
         })
         
-        # print(image_id['file_name'])
-
         return image, target, index
     
     
