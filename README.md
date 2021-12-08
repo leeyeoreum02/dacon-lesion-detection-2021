@@ -18,4 +18,7 @@ Public LB AP/Private LB AP
 
 - EfficientDet-d7 image-size 512: Fold0 0.725 Fold1 - Fold2 - Fold3 -
 - EfficientDet-d5 image-size 384: Fold0 0.699 Fold1 0.709 Fold2 - Fold3 0.710 Fold4 0.697
-- Ensemble 9 models above using wbf can achieve **0.7675 Public LB/0.8261 Prviate LB (4/250)**
+- Ensemble 9 models above using wbf can achieve **0.7675 Public LB/0.8261 Prviate LB (4th/250)**
+
+### Weights
+- [Download weights zip file (.ckpt)](https://drive.google.com/file/d/1XmdUqAcj06DN4Hd9QLII0GdweV24bHjw/view?usp=sharing)

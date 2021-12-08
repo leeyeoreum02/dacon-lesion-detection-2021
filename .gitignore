@@ -3,7 +3,5 @@ lightning_logs
 
 data/
 examples/
-results/
 submissions/
-wbf_results/
 weights/
