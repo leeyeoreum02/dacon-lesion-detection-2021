@@ -18,6 +18,7 @@ from ensemble_boxes.ensemble_boxes_wbf import weighted_boxes_fusion
 from lib.model_effdet import EfficientDetModel
 from lib.dataset import EfficientDetDataModule
 from lib.visualize import draw_bbox_result
+from lib.utils import convert_to_jpg
 
 
 def get_args():
@@ -186,9 +187,9 @@ def get_submission(
     submission.to_csv(save_path, index=False)
     
 
-def eval(ckpt_path, model_name, args, fold, epoch):
+def eval(root_path, ckpt_path, model_name, args, fold, epoch):
     data_module = EfficientDetDataModule(
-        image_dir='./data/',
+        image_dir=root_path,
         num_workers=args.num_workers,
         batch_size=args.batch_size,
         predict_transforms=get_predict_transforms(image_size=args.image_size)
@@ -219,9 +220,26 @@ def eval(ckpt_path, model_name, args, fold, epoch):
 
 
 def main():
-    ckpt_name = 'epoch=49-val_map50=0.01.ckpt'
-    ckpt_dir = './weights/effdetd5/3/'
-    ckpt_path = os.path.join(ckpt_dir, ckpt_name)
+    convert_to_jpg('test', './ori_data/', './data/test')
+    
+    root_path = './data/test/'
+    
+    for root, dirs, files in os.walk('./weights'):
+        if not dirs:
+            ckpt_dir = root
+            ckpt_name = files
+            ckpt_path = os.path.join(root, files)
+            
+            args = get_args()
+            model_name = root.split('\\')[1]
+            fold = int(ckpt_dir.split('/')[3])
+            epoch = int(ckpt_name.split('-')[0].split('=')[-1])    
+    
+            eval(root_path, ckpt_path, model_name, args, fold, epoch)
+
+    # ckpt_name = 'epoch=49-val_map50=0.01.ckpt'
+    # ckpt_dir = './weights/effdetd5/3/'
+    # ckpt_path = os.path.join(ckpt_dir, ckpt_name)
     
     json_paths = sorted(glob('./results/*.json'))
     weights = [1., 1.1, 1., 1.1, 1., 1.2, 1.2, 1.2, 1.2]
@@ -230,7 +248,6 @@ def main():
     wbf_save_dir = './wbf_results/'
     wbf_save_filename = f'effdetd5+d7i512-fold0,1,2,3,4,0,1,2,3-wbf{weights}.json'
     
-    root_path = './data/test/'
     json_dir = 'wbf_results'
     # json_dir = 'results'
     json_name = f'{wbf_save_filename.split(".json")[0]}'
@@ -240,14 +257,8 @@ def main():
     save_path = f'./examples/test/effdetd5+d7i512/wbf/0,1,2,3,4,0,1,2,3'
     # save_path = f'./examples/test/effdetd7i512/fold/3/'
     
-    model_name = 'effdetd5'
-    args = get_args()
-    fold = int(ckpt_dir.split('/')[3])
-    epoch = int(ckpt_name.split('-')[0].split('=')[-1])
     submission_thr = 0.22
-    
-    eval(ckpt_path, model_name, args, fold, epoch)
-    
+        
     run_wbf(
         root_path, json_paths, 
         wbf_save_dir, wbf_save_filename,

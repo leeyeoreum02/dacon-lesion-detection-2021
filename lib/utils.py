@@ -1,8 +1,12 @@
 import os
 import json
+import base64
+import shutil
 from glob import glob
 from tqdm import tqdm
 import numpy as np
+from io import BytesIO
+from PIL import Image
 from collections import defaultdict
 
 
@@ -61,3 +65,23 @@ def convert_to_coco(
         
     with open(save_path, 'w') as f:
         json.dump(res, f)
+        
+        
+def convert_to_jpg(
+    mode: str,
+    root_path: os.PathLike,
+    save_path: os.PathLike,
+):
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+    else:
+        shutil.rmtree(save_path)
+        os.makedirs(save_path)
+        
+    json_paths = glob(os.path.join(root_path, mode, '*.json'))
+    for json_path in tqdm(json_paths):
+        with open(json_path, 'r') as f:
+            tmp = json.load(f)
+        image = BytesIO(base64.b64decode(tmp['imageData']))
+        image = Image.open(image).convert('RGB')
+        image.save(os.path.join(save_path, tmp['file_name'].split('.')[0])+'.jpg')
