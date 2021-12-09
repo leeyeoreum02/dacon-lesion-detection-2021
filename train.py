@@ -81,7 +81,8 @@ def split_dataset(annot_path: os.PathLike, save_path: os.PathLike, seed: int = 4
     kfold = KFold(n_splits=5)
     for fold, (train, valid) in enumerate(kfold.split(df, df.index)):
         df.loc[valid, 'kfold'] = int(fold)
-        
+
+    print(df['kfold'].value_counts())
     df.to_csv(save_path, index=False)
 
 
