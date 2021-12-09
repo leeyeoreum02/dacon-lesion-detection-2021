@@ -220,7 +220,7 @@ def eval(ckpt_path, model_name, args, fold, epoch):
 
 
 def main():
-    convert_to_jpg('test', './ori_data/', './data/test')
+    # convert_to_jpg('test', './ori_data/', './data/test')
         
     for root, dirs, files in os.walk('./weights'):
         if not dirs:

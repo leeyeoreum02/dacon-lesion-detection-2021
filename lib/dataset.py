@@ -133,47 +133,46 @@ class EfficientDetDataModule(LightningDataModule):
         self.train_image_dir = os.path.join(self.image_dir, 'train')
         self.annot_path = os.path.join(self.train_image_dir, 'annotations.json')
         self.predict_image_dir = os.path.join(self.image_dir, 'test')
-        self.train_transforms = train_transforms
-        self.valid_transforms = valid_transforms
+        # self.train_transforms = train_transforms
+        # self.valid_transforms = valid_transforms
         self.predict_transforms = predict_transforms
         self.num_workers = num_workers
         self.batch_size = batch_size
 
     def setup(self, stage=None):
-        self.train_dataset = EfficientDetDataset(
-            self.train_image_dir, self.train_fold_id, self.annot_path, self.train_transforms)
-        self.valid_dataset = EfficientDetDataset(
-            self.train_image_dir, self.valid_fold_id, self.annot_path, self.valid_transforms)
+        # self.train_dataset = EfficientDetDataset(
+        #     self.train_image_dir, self.train_fold_id, self.annot_path, self.train_transforms)
+        # self.valid_dataset = EfficientDetDataset(
+        #     self.train_image_dir, self.valid_fold_id, self.annot_path, self.valid_transforms)
         self.predict_dataset = EfficientDetEvalDataset(
             self.predict_image_dir, self.predict_transforms)
 
-    def train_dataloader(self):
-        return DataLoader(
-            self.train_dataset,
-            batch_size=self.batch_size,
-            shuffle=True,
-            pin_memory=True,
-            num_workers=self.num_workers,
-            collate_fn=self.train_collate_fn,
-        )
+    # def train_dataloader(self):
+    #     return DataLoader(
+    #         self.train_dataset,
+    #         batch_size=self.batch_size,
+    #         shuffle=True,
+    #         pin_memory=True,
+    #         num_workers=self.num_workers,
+    #         collate_fn=self.train_collate_fn,
+    #     )
 
-    def val_dataloader(self):
-        return DataLoader(
-            self.valid_dataset,
-            batch_size=self.batch_size,
-            shuffle=False,
-            pin_memory=True,
-            drop_last=True,
-            num_workers=self.num_workers,
-            collate_fn=self.train_collate_fn,
-        )
+    # def val_dataloader(self):
+    #     return DataLoader(
+    #         self.valid_dataset,
+    #         batch_size=self.batch_size,
+    #         shuffle=False,
+    #         pin_memory=True,
+    #         drop_last=True,
+    #         num_workers=self.num_workers,
+    #         collate_fn=self.train_collate_fn,
+    #     )
         
     def predict_dataloader(self):
         return DataLoader(
             self.predict_dataset,
             batch_size=self.batch_size,
             shuffle=False,
-            drop_last=True,
             num_workers=self.num_workers,
             collate_fn=self.predict_collate_fn
         )
