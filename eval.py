@@ -24,7 +24,7 @@ from lib.utils import convert_to_jpg
 def get_args():
     parser = argparse.ArgumentParser(description='Evaluating EfficientDet')
     parser.add_argument('--image_size', type=int, default=384)
-    parser.add_argument('--batch_size', type=int, default=64)
+    parser.add_argument('--batch_size', type=int, default=128)
     parser.add_argument('--architecture_name', type=str, default='tf_efficientdet_d4')
     parser.add_argument('--num_workers', type=int, default=8)
     args = parser.parse_args()
@@ -187,9 +187,9 @@ def get_submission(
     submission.to_csv(save_path, index=False)
     
 
-def eval(root_path, ckpt_path, model_name, args, fold, epoch):
+def eval(ckpt_path, model_name, args, fold, epoch):
     data_module = EfficientDetDataModule(
-        image_dir=root_path,
+        image_dir='./data',
         num_workers=args.num_workers,
         batch_size=args.batch_size,
         predict_transforms=get_predict_transforms(image_size=args.image_size)
@@ -221,26 +221,32 @@ def eval(root_path, ckpt_path, model_name, args, fold, epoch):
 
 def main():
     convert_to_jpg('test', './ori_data/', './data/test')
-    
-    root_path = './data/test/'
-    
+        
     for root, dirs, files in os.walk('./weights'):
         if not dirs:
             ckpt_dir = root
-            ckpt_name = files
-            ckpt_path = os.path.join(root, files)
+            ckpt_name = files[0]
+            ckpt_path = os.path.join(ckpt_dir, ckpt_name)
             
             args = get_args()
-            model_name = root.split('\\')[1]
-            fold = int(ckpt_dir.split('/')[3])
+            model_name = ckpt_dir.split('\\')[1]
+            
+            if model_name == 'effdetd5':
+                args.architecture_name = 'tf_efficientdet_d5'
+            elif model_name == 'effdetd7i512':
+                args.architecture_name = 'tf_efficientdet_d7'
+                args.image_size = 512
+                
+            fold = int(ckpt_dir.split('\\')[-1])
             epoch = int(ckpt_name.split('-')[0].split('=')[-1])    
     
-            eval(root_path, ckpt_path, model_name, args, fold, epoch)
+            eval(ckpt_path, model_name, args, fold, epoch)
 
     # ckpt_name = 'epoch=49-val_map50=0.01.ckpt'
     # ckpt_dir = './weights/effdetd5/3/'
     # ckpt_path = os.path.join(ckpt_dir, ckpt_name)
     
+    root_path = './data/test/'
     json_paths = sorted(glob('./results/*.json'))
     weights = [1., 1.1, 1., 1.1, 1., 1.2, 1.2, 1.2, 1.2]
     iou_thr = 0.55

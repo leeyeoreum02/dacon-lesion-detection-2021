@@ -173,6 +173,7 @@ class EfficientDetDataModule(LightningDataModule):
             self.predict_dataset,
             batch_size=self.batch_size,
             shuffle=False,
+            drop_last=True,
             num_workers=self.num_workers,
             collate_fn=self.predict_collate_fn
         )
