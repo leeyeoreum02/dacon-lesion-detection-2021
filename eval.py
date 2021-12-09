@@ -220,7 +220,7 @@ def eval(ckpt_path, model_name, args, fold, epoch):
 
 
 def main():
-    # convert_to_jpg('test', './ori_data/', './data/test')
+    convert_to_jpg('test', './ori_data/', './data/test')
         
     for root, dirs, files in os.walk('./weights'):
         if not dirs:
@@ -241,10 +241,6 @@ def main():
             epoch = int(ckpt_name.split('-')[0].split('=')[-1])    
     
             eval(ckpt_path, model_name, args, fold, epoch)
-
-    # ckpt_name = 'epoch=49-val_map50=0.01.ckpt'
-    # ckpt_dir = './weights/effdetd5/3/'
-    # ckpt_path = os.path.join(ckpt_dir, ckpt_name)
     
     root_path = './data/test/'
     json_paths = sorted(glob('./results/*.json'))
